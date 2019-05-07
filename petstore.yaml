@@ -254,16 +254,19 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "api_key"
-        in: "header"
-        required: false
-        type: "string"
-      - name: "petId"
-        in: "path"
-        description: "Pet id to delete"
+      - in: "body"
+        name: "body"
+        description: "Request"
         required: true
-        type: "integer"
-        format: "int64"
+        schema:
+          type: object
+          required:
+          - petId
+          properties:
+            petId:
+              description: "ID of pet that needs to be delted"
+              type: "integer"
+              format: "int64"
       responses:
           200:
             description: "Response, exactly one of the top level properties"
@@ -290,9 +293,17 @@ paths:
       summary: "Returns pet inventories by status"
       description: "Returns a map of status codes to quantities"
       operationId: "getInventory"
+      consumes:
+      - "application/json"
       produces:
       - "application/json"
-      parameters: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Request"
+          required: true
+          schema:
+            type: object
       responses:
         200:
           description: "successful operation"
@@ -310,6 +321,8 @@ paths:
       summary: "Place an order for a pet"
       description: ""
       operationId: "placeOrder"
+      consumes:
+      - "application/json"
       produces:
       - "application/json"
       parameters:
@@ -321,11 +334,16 @@ paths:
           $ref: "#/definitions/Order"
       responses:
         200:
-          description: "successful operation"
+          description: "Response, exactly one of the top level properties"
           schema:
-            $ref: "#/definitions/Order"
-        400:
-          description: "Invalid Order"
+            type: object
+            properties:
+              orderPlaced:
+                description: "The order was placed"
+                $ref: "#/definitions/Order"
+              invalidOrder:
+                description: "The order was invalid"
+                type: object
   /store:getOrderById:
     post:
       tags:
@@ -334,6 +352,8 @@ paths:
       description: "For valid response try integer IDs with value >= 1 and <= 10.\
         \ Other values will generated exceptions"
       operationId: "getOrderById"
+      consumes:
+      - "application/json"
       produces:
       - "application/json"
       parameters:
@@ -354,13 +374,19 @@ paths:
               minimum: 1.0
       responses:
         200:
-          description: "successful operation"
+          description: "Response, exactly one of the top level properties"
           schema:
-            $ref: "#/definitions/Order"
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Order not found"
+            type: object
+            properties:
+              order:
+                description: "The order"
+                $ref: "#/definitions/Order"
+              invalidId:
+                description: "The order ID was invalid"
+                type: object
+              noSuchOrder:
+                description: "No order with that ID"
+                type: object
   /store:deleteOrderById:
     post:
       tags:
@@ -369,6 +395,8 @@ paths:
       description: "For valid response try integer IDs with positive integer value.\
         \ Negative or non-integer values will generate API errors"
       operationId: "deleteOrder"
+      consumes:
+      - "application/json"
       produces:
       - "application/json"
       parameters:
@@ -387,10 +415,19 @@ paths:
               format: "int64"
               minimum: 1.0
       responses:
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Order not found"
+        200:
+          description: "Response, exactly one of the top level properties"
+          schema:
+            type: object
+            properties:
+              deleted:
+                description: "The order was deleted"
+              invalidId:
+                description: "The order ID was invalid"
+                type: object
+              noSuchOrder:
+                description: "No order with that ID"
+                type: object
   /users:create:
     post:
       tags:
@@ -398,6 +435,8 @@ paths:
       summary: "Create user"
       description: "This can only be done by the logged in user."
       operationId: "createUser"
+      consumes:
+      - "application/json"
       produces:
       - "application/json"
       parameters:
@@ -408,8 +447,14 @@ paths:
         schema:
           $ref: "#/definitions/User"
       responses:
-        default:
-          description: "successful operation"
+          200:
+            description: "Response, exactly one of the top level properties"
+            schema:
+              type: object
+              properties:
+                created:
+                  description: "The user was created"
+                  type: object
   /users:batchCreate:
     post:
       tags:
@@ -417,6 +462,8 @@ paths:
       summary: "Creates list of users with given input array"
       description: ""
       operationId: "createUsersWithArrayInput"
+      consumes:
+      - "application/json"
       produces:
       - "application/json"
       parameters:
@@ -429,8 +476,14 @@ paths:
           items:
             $ref: "#/definitions/User"
       responses:
-        default:
-          description: "successful operation"
+          200:
+            description: "Response, exactly one of the top level properties"
+            schema:
+              type: object
+              properties:
+                created:
+                  description: "The users were created"
+                  type: object
   /users:login:
     post:
       tags:
@@ -438,36 +491,50 @@ paths:
       summary: "Logs user into the system"
       description: ""
       operationId: "loginUser"
+      consumes:
+      - "application/json"
       produces:
-      - "application/xml"
       - "application/json"
       parameters:
-      - name: "username"
-        in: "query"
-        description: "The user name for login"
+      - in: "body"
+        name: "body"
+        description: "Request"
         required: true
-        type: "string"
-      - name: "password"
-        in: "query"
-        description: "The password for login in clear text"
-        required: true
-        type: "string"
+        schema:
+          type: object
+          required:
+          - username
+          - password
+          properties:
+            username:
+              description: "The user name for login"
+              type: "string"
+            password:
+              description: "The password for login in clear text"
+              type: "string"
       responses:
         200:
-          description: "successful operation"
+          description: "Response, exactly one of the top level properties"
           schema:
-            type: "string"
-          headers:
-            X-Rate-Limit:
-              type: "integer"
-              format: "int32"
-              description: "calls per hour allowed by the user"
-            X-Expires-After:
-              type: "string"
-              format: "date-time"
-              description: "date in UTC when token expires"
-        400:
-          description: "Invalid username/password supplied"
+            type: object
+            properties:
+              loggedIn:
+                description: "The user was successfully logged in"
+                type: object
+                properties:
+                  token:
+                    type: string
+                  rateLimit:
+                    type: "integer"
+                    format: "int32"
+                    description: "calls per hour allowed by the user"
+                  expiresAfter:
+                    type: "string"
+                    format: "date-time"
+                    description: "date in UTC when token expires"
+              failed:
+                description: "Invalid username/password supplied"
+                type: object
   /users:logout:
     post:
       tags:
@@ -475,13 +542,25 @@ paths:
       summary: "Logs out current logged in user session"
       description: ""
       operationId: "logoutUser"
-      produces:
-      - "application/xml"
+      consumes:
       - "application/json"
-      parameters: []
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Request"
+        required: true
+        schema:
+          type: object
       responses:
-        default:
-          description: "successful operation"
+        200:
+          description: "Response, exactly one of the top level properties"
+          schema:
+            type: object
+            properties:
+              loggedOut:
+                description: "The user was successfully logged out"
   /users:getByName:
     post:
       tags:
@@ -489,6 +568,8 @@ paths:
       summary: "Get user by user name"
       description: ""
       operationId: "getUserByName"
+      consumes:
+      - "application/json"
       produces:
       - "application/json"
       parameters:
@@ -506,13 +587,18 @@ paths:
               type: "string"
       responses:
         200:
-          description: "successful operation"
+          description: "Response, exactly one of the top level properties"
           schema:
-            $ref: "#/definitions/User"
-        400:
-          description: "Invalid username supplied"
-        404:
-          description: "User not found"
+            type: object
+            properties:
+              user:
+                description: "The user"
+              invalidName:
+                description: "Invalid username supplied"
+                type: object
+              noSuchUser:
+                description: "User not found"
+                type: object
   /users:update:
     post:
       tags:
@@ -520,6 +606,8 @@ paths:
       summary: "Updated user"
       description: "This can only be done by the logged in user."
       operationId: "updateUser"
+      consumes:
+      - "application/json"
       produces:
       - "application/json"
       parameters:
@@ -540,10 +628,19 @@ paths:
               description: "Updated user object"
               $ref: "#/definitions/User"
       responses:
-        400:
-          description: "Invalid user supplied"
-        404:
-          description: "User not found"
+        200:
+          description: "Response, exactly one of the top level properties"
+          schema:
+            type: object
+            properties:
+              updated:
+                description: "The user was updated"
+              invalid:
+                description: "Invalid user supplied"
+                type: object
+              noSuchUser:
+                description: "User not found"
+                type: object
   /users:delete:
     post:
       tags:
@@ -551,6 +648,8 @@ paths:
       summary: "Delete user"
       description: "This can only be done by the logged in user."
       operationId: "deleteUser"
+      consumes:
+      - "application/json"
       produces:
       - "application/json"
       parameters:
@@ -567,10 +666,19 @@ paths:
               description: "The name of the user that should be deleted"
               type: "string"
       responses:
-        400:
-          description: "Invalid username supplied"
-        404:
-          description: "User not found"
+        200:
+          description: "Response, exactly one of the top level properties"
+          schema:
+            type: object
+            properties:
+              deleted:
+                description: "The user was updated"
+              invalidName:
+                description: "Invalid username supplied"
+                type: object
+              noSuchUser:
+                description: "User not found"
+                type: object
 securityDefinitions:
   petstore_auth:
     type: "oauth2"
