@@ -11,7 +11,8 @@ A *frumpy* API is a subset of the APIs that can described using Swagger.
   * 400 Bad Request
   * 401 Unauthorized
   * 403 Forbidden
-  * 5xx
+  * 500 Internal Server Error
+  * 503 Service Unavailable
 * Only POST allowed
 * Reponses are "one of", kind of like responses in gRPC
 
