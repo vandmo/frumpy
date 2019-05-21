@@ -30,5 +30,7 @@ Have you ever spent half a day trying to figure out the "correct" way of, for ex
 Now ask yourself how the solution you came up with is better than `POST /users:activate`.
 Was you answer "My solution is more RESTful"? If not, please let me know.
 
+## See
+I prefer using a : as a separator but a dot could be used instead when motivated technical limitations.
 ## Work in progress
 https://petstore.swagger.io/?url=https://raw.githubusercontent.com/vandmo/frumpy/master/petstore.yaml
